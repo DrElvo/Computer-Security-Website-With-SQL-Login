@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Login</title>
+        <link href="style.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <div class="Login-Cont">
+            <h1>Login</h1>
+            <form action = "authenticate.php" method="post">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <label for="password">
+					<i class="fas fa-lock"></i>
+				</label>
+                <input type="submit" value="Login">
+            </form> 
+            <form action = "signup.php" method="post">
+                <input type="submit" value="Sign Up">
+            </form>
+        </div>
+    </body>
+</html>
