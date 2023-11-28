@@ -3,22 +3,62 @@
         <meta charset="utf-8">
         <title>Login</title>
         <link href="style.css" rel="stylesheet" type="text/css">
+        <style>
+            #signup{
+                display:none;
+            }
+        </style>
     </head>
     <body>
+        
         <div class="Login-Cont">
-            <h1>Login</h1>
-            <form action = "authenticate.php" method="post">
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <label for="password">
-					<i class="fas fa-lock"></i>
-				</label>
-                <input type="submit" value="Login">
-            </form> 
-            <form action = "signup.php" method="post">
-                <input type="submit" value="Sign Up ">
-            </form>
+            <section id="login">
+                <h1>Login: <a href="#" onclick="toggleForm('signup')">Sign Up</a></h1>
+                <form action = "authenticate.php" method="post">
+                    <input type="text" name="username" placeholder="Username" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                    </label>
+                    <input type="submit" value="Login">
+                </form> 
+            </section>
+
+            <section id="signup">
+                <h1>Sign Up: <a href="#" onclick="toggleForm('login')">Login</a></h1>
+                <form action="signup.php" method="post">
+                    <input type="text" name="username" placeholder="Username">
+                    <input type="password" name="password" placeholder="Password">
+                    <input type="email" name="email" placeholder="Email">
+                    <button type="submit">Sign Up</button>
+                  </form>
+            </section>
 
         </div>
+
+        <script>
+            function toggleForm(formName) {
+                var loginSection = document.getElementById('login');
+                var signupSection = document.getElementById('signup');
+    
+                if (formName === 'signup') {
+                    loginSection.style.display = 'none';
+                    signupSection.style.display = 'block';
+                } else {
+                    loginSection.style.display = 'block';
+                    signupSection.style.display = 'none';
+                }
+            }
+        </script>
+
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('signedup');
+
+            if (signedup === '1') {
+                alert('Signup successful, login now');
+            }
+        </script>
+        
     </body>
 </html>

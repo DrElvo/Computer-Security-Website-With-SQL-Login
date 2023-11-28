@@ -26,7 +26,7 @@ if ($stmt = $con->prepare('SELECT id, password FROM accounts WHERE username = ?'
             $_SESSION['loggedin'] = TRUE;
             $_SESSION['name'] = $_POST['username'];
             $_SESSION['id'] = $id;
-            echo $_SESSION['name'] . ': You Have Logged In';
+            echo 'Welcome ' . $_SESSION['name'] ;
         } else {
             echo 'Incorrect password';
         }
