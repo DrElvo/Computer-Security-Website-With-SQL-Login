@@ -1,64 +1,160 @@
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Login</title>
-        <link href="style.css" rel="stylesheet" type="text/css">
-        <style>
-            #signup{
-                display:none;
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
+    <style>
+        #signup{
+            display:none;
+        }
+    </style>
+</head>
+
+<body onload="initializePage()">
+    <div class="Login-Cont">
+        <section id="login">
+            <h1>Login: <a href="#" onclick="toggleForm('signup')">Sign Up</a></h1>
+            <form action="authenticate.php" method="post" id="login">
+                <input type="text" id="username_login"     name="username_login" placeholder="Username" onkeyup='check_login();' required>
+                <input type="password" id="password_login" name="password_login" placeholder="Password" onkeyup='check_login();' required>
+                <label for="password_login">
+                    <i class="fas fa-lock"></i>
+                </label>                
+                <input type="hidden" name="token" id="token">
+                <button type="button" id="submit_login" onclick="getRecaptchaTokenLogin()">Login</button>
+                <span id='message_login'></span>
+            </form>
+        </section>
+
+        <section id="signup">
+            <h1>Sign Up: <a href="#" onclick="toggleForm('login')">Login</a></h1>
+            <form action="signup.php" method="post" id="signupFrom">
+                <input type="text" id="username_signup" name="username_signup" placeholder="Username" onkeyup='check_signup();' required>
+                <input type="email" id="email" name="email" placeholder="Email" onkeyup='check_signup();' required>
+                <input type="phoneNumber" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" onkeyup='check_signup();' required>
+                <input type="password" name="password_signup" id="password_signup"  placeholder="Password" onkeyup='check_signup();' required/>
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" onkeyup='check_signup();' required/>
+                <input type="hidden" name="token" id="token"> 
+                <button type="button" id="submit_signup" onclick="getRecaptchaTokenSignup()">Sign Up</button>
+                <span id='message_signup'></span>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        function toggleForm(formName) {
+
+
+            //THIS PIECE OF CODE: <input type="hidden" name="token" id="token">  HAS BEEN REMOVED FROM LINE 24, PLEASE REINSERT WHEN FIXING THE CAPTCHA
+            
+            //SWITCHES BETWEEN THE SIGNUP AND LOGIN PAGES ON THE SAME HTML PAGE
+
+            var loginSection = document.getElementById('login');
+            var signupSection = document.getElementById('signup');
+
+            if (formName === 'signup') {
+                loginSection.style.display = 'none';
+                signupSection.style.display = 'block';
+            } else {
+                loginSection.style.display = 'block';
+                signupSection.style.display = 'none';
             }
-        </style>
-    </head>
-    <body>
+        }
+
+        function initializePage() {
+
+            //INTIALISES THE PAGE, DOES A STARTING CHECK TO BLOCK OUT THE BUTTONS ON THE PAGES
+
+            check_signup();
+            check_login();
+            newsignup();
+        }
+
+        var check_signup = function() {
+
+            var username = document.getElementById('username_signup').value;
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password_signup').value;
+            var confirmPassword = document.getElementById('confirm_password').value;
+
+            if (username === '' || email == '' || password == '' || confirmPassword.value == '' ) {
+                document.getElementById('message_signup').style.color = 'red';
+                document.getElementById('message_signup').innerHTML = 'empty fields';
+                document.getElementById('submit_signup').disabled = true;
+            } else if (password != confirmPassword) {
+                document.getElementById('message_signup').style.color = 'yellow';
+                document.getElementById('message_signup').innerHTML = 'not matching';
+                document.getElementById('submit_signup').disabled = true;
+            } else {
+                document.getElementById('message_signup').style.color = 'green';
+                document.getElementById('message_signup').innerHTML = 'fields full';
+                document.getElementById('submit_signup').disabled = false;
+            }
+        }
+
+        var check_login = function() {
+
+            var username = document.getElementById('username_login').value;
+            var password = document.getElementById('password_login').value; 
+
+            if (username == '' || password == '') {
+                document.getElementById('message_login').style.color = 'red';
+                document.getElementById('message_login').innerHTML = 'empty fields';
+                submit_login.disabled = true;
+            } else{
+                document.getElementById('message_login').style.color = 'green';
+                document.getElementById('message_login').innerHTML = 'fields full';
+                submit_login.disabled = false;
+            }
+        }
+
+        function newsignup() {
+
+        //CHECKS WHETHER OR NOT THERE IS A TAG IN THE URL WHICH INDICATES THAT THE USER HAS JUST SIGNED UP, AND BEEN REDIRECTED BACK TO THE LOGIN PAGE
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('signedup');
+
+        if (success === '1') {
+            alert('Signup successful, login now');
+        }
+        }
+
         
-        <div class="Login-Cont">
-            <section id="login">
-                <h1>Login: <a href="#" onclick="toggleForm('signup')">Sign Up</a></h1>
-                <form action = "authenticate.php" method="post">
-                    <input type="text" name="username" placeholder="Username" required>
-                    <input type="password" name="password" placeholder="Password" required>
-                    <label for="password">
-                        <i class="fas fa-lock"></i>
-                    </label>
-                    <input type="submit" value="Login">
-                </form> 
-            </section>
 
-            <section id="signup">
-                <h1>Sign Up: <a href="#" onclick="toggleForm('login')">Login</a></h1>
-                <form action="signup.php" method="post">
-                    <input type="text" name="username" placeholder="Username">
-                    <input type="password" name="password" placeholder="Password">
-                    <input type="email" name="email" placeholder="Email">
-                    <button type="submit">Sign Up</button>
-                  </form>
-            </section>
+        function getRecaptchaToken(formAction) {
+        grecaptcha.ready(function () {
+            grecaptcha.execute('6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx', { action: 'submit' }).then(function (token) {
+                console.log('Token:', token);
+                console.log('Form Action:', formAction);
 
-        </div>
+                // Set the token value in the respective form
+                document.getElementById('token').value = token;
 
-        <script>
-            function toggleForm(formName) {
-                var loginSection = document.getElementById('login');
-                var signupSection = document.getElementById('signup');
-    
-                if (formName === 'signup') {
-                    loginSection.style.display = 'none';
-                    signupSection.style.display = 'block';
-                } else {
-                    loginSection.style.display = 'block';
-                    signupSection.style.display = 'none';
+                // Set the form action and submit based on the formAction parameter
+                if (formAction === 'authenticate.php') {
+                    document.getElementById('submit_login').formAction = formAction;
+                    document.getElementById('submit_login').form.submit();
+                } else if (formAction === 'signup.php') {
+                    document.getElementById('submit_signup').formAction = formAction;
+                    document.getElementById('submit_signup').form.submit();
                 }
-            }
-        </script>
-
-        <script>
-            const urlParams = new URLSearchParams(window.location.search);
-            const success = urlParams.get('signedup');
-
-            if (signedup === '1') {
-                alert('Signup successful, login now');
-            }
-        </script>
+            });
+        });
+    }
         
-    </body>
+
+        function getRecaptchaTokenLogin() {
+            getRecaptchaToken('authenticate.php');
+        }
+
+        function getRecaptchaTokenSignup() {
+            getRecaptchaToken('signup.php');
+        }
+
+    </script>
+</body>
 </html>
+
+  

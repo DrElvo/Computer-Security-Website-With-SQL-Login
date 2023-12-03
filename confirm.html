@@ -1,0 +1,53 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Confirm</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
+    <style>
+        #signup{
+            display:none;
+        }
+    </style>
+</head>
+
+<body onload="check()">
+    <form action="confirm.php" method="POST">
+        <div>
+            <section id="login">
+                <h1>Confirm code:</h1>
+                <input type="text" id="confirm_code" name="confirm_code" placeholder="Confirmation Code" oninput='check();' required inputmode="numeric" pattern="[0-9]*" min="0">
+                <button type="submit" id="submit">Submit</button>
+                <span id='message'></span>
+            </section>
+        </div>
+    </form>
+
+    
+    <script>
+        var confirmCode = document.getElementById('confirm_code');
+
+        confirmCode.addEventListener('input', function(event) {
+            var code = confirmCode.value.replace(/\D/g, '');
+            confirmCode.value = code;
+        });
+
+        var check = function() {
+            var code = confirmCode.value;
+
+            if (code.length < 6) {
+                document.getElementById('message').style.color = 'red';
+                document.getElementById('message').innerHTML = 'Too short';
+                document.getElementById('submit').disabled = true;
+            } else if (code.length > 6) {
+                confirmCode.value = code.slice(0, 6);
+            } else {
+                document.getElementById('message').style.color = 'green';
+                document.getElementById('message').innerHTML = 'Ready';
+                document.getElementById('submit').disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>
