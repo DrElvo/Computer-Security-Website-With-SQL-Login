@@ -1,0 +1,73 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
+    <style>
+    </style>
+</head>
+
+
+<body onload="check_signup()">
+
+<section id="signup">
+    <h1>Sign Up: <a href="login.html">Login</a> <a href="index.html">Home</a></h1>
+    <form action="signup.php" method="post" id="signupForm">
+        <input type="text" id="username_signup" name="username_signup" placeholder="Username" onkeyup='check_signup();' required>
+        <input type="email" id="email" name="email" placeholder="Email" onkeyup='check_signup();' required>
+        <input type="phoneNumber" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" onkeyup='check_signup();' required>
+        <input type="password" name="password_signup" id="password_signup"  placeholder="Password" onkeyup='check_signup();' required/>
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" onkeyup='check_signup();' required/>
+        <input type="hidden" name="token" id="token"> 
+        <button type="button" id="submit_signup" onclick="getRecaptchaToken()">Sign Up</button>
+        <span id='message_signup'></span>
+    </form>
+</section>
+
+</body>
+
+<script>
+
+  function getRecaptchaToken() {
+        grecaptcha.ready(function () {
+            grecaptcha.execute('6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx', { action: 'submit' }).then(function (token) {
+                formAction = 'signup.php'
+                console.log('Token:', token);
+                console.log('Form Action:', formAction);
+
+                // Set the token value in the respective form
+                document.getElementById('token').value = token;
+
+                // Set the form action and submit based on the formAction parameter
+                document.getElementById('submit_signup').formAction = formAction;
+                document.getElementById('submit_signup').form.submit();
+            });
+        });
+    }
+
+    var check_signup = function() {
+
+    var username = document.getElementById('username_signup').value;
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password_signup').value;
+    var confirmPassword = document.getElementById('confirm_password').value;
+
+    if (username === '' || email == '' || password == '' || confirmPassword.value == '' ) {
+        document.getElementById('message_signup').style.color = 'red';
+        document.getElementById('message_signup').innerHTML = 'empty fields';
+        document.getElementById('submit_signup').disabled = true;
+    } else if (password != confirmPassword) {
+        document.getElementById('message_signup').style.color = 'yellow';
+        document.getElementById('message_signup').innerHTML = 'not matching';
+        document.getElementById('submit_signup').disabled = true;
+    } else {
+        document.getElementById('message_signup').style.color = 'green';
+        document.getElementById('message_signup').innerHTML = 'fields full';
+        document.getElementById('submit_signup').disabled = false;
+    }
+}
+
+
+</script>
+</html>

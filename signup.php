@@ -7,24 +7,8 @@ use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 
 session_start();
-$DATABASE_HOST = 'localhost';
-$DATABASE_USER = 'root';
-$DATABASE_PASS = '';
-$DATABASE_NAME = 'hci_login';
 
-/*
-$DATABASE_HOST = 'localhost';
-$DATABASE_USER = 'id21600928_th443';
-$DATABASE_PASS = 'Password1%';
-$DATABASE_NAME = 'id21600928_accounts';
-*/
-
-#INITIALISE DATABASE
-
-$con = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
-if (mysqli_connect_errno()) {
-    exit('Failed to connect to MySQL: ' . mysqli_connect_error());
-}
+include_once 'databaseConnect.php';
 
 #INITIALISE CAPTCHA
 
@@ -79,55 +63,73 @@ if ($check_stmt) {
 
         } else {
 
-            try {
-
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-
-            $mail->isSMTP();
-
-            $mail->Host = 'smtp.gmail.com';
-
-            $mail->SMTPAuth = true;
-
-            $mail->Username = 'humphrey.tomw@gmail.com';
-
-            $mail->Password = 'eshi jufi eosr jkrp';
-
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-
-            $mail->Port = 587;
-
-            $mail->setFrom('humphrey.tomw@gmail.com', 'adnan-tech.com');
-
-            $mail->addAddress($email, $username);
-
-            $mail->isHTML(true);
-
-            $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
-
-            $mail->Subject = 'Email_Verification';
-            $mail->Body = '<p>Your verification code is: <b style="font-size: 30px;">' .
-            $verification_code. '</b></p>';
-
-            $mail->send();
-
-            } catch (Exception $e) {
-
-                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-
-            }
-
             $stmt = $con->prepare('INSERT INTO accounts (username, password, email, phoneNumber, verifyCode) VALUES (?, ?, ?, ?, ?)');
             if (!$stmt) {
                 exit('Error in SQL statement');
             }
 
+            $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
             $hashed_password = password_hash($_POST['password_signup'], PASSWORD_DEFAULT);
             $stmt->bind_param('sssss', $username, $hashed_password, $email, $phoneNumber, $verification_code);
 
             if ($stmt->execute()) {
+                
                 $stmt->close();
+
+                $stmt = $con->prepare('SELECT id FROM accounts WHERE username = ?');
+                $stmt->bind_param('s', $username);
+                $stmt->execute();
+                $stmt->store_result();
+                $stmt->bind_result($id);
+                $stmt->fetch();
+                
+                try {
+
+                    $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+        
+                    $mail->isSMTP();
+        
+                    $mail->Host = 'smtp.gmail.com';
+        
+                    $mail->SMTPAuth = true;
+        
+                    $mail->Username = 'humphrey.tomw@gmail.com';
+        
+                    $mail->Password = 'eshi jufi eosr jkrp';
+        
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        
+                    $mail->Port = 587;
+        
+                    $mail->setFrom('humphrey.tomw@gmail.com', 'adnan-tech.com');
+        
+                    $mail->addAddress($email, $username);
+        
+                    $mail->isHTML(true);
+        
+                    $mail->Subject = 'Email_Verification';
+
+                    $mail->Body = '<p>Your verification code is:    <b style="font-size: 30px;">' . $verification_code. '</b></p>' . 
+                    
+                    "http://localhost/PHP/confirm.html?linked=1&id=$id&verificationCode=$verification_code"
+                    
+                    ;
+        
+                    $mail->send();
+        
+                    } catch (Exception $e) {
+        
+                        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        
+                    }
+
+                $stmt->close();        
                 $con->close();
+            
+                // Close the session and then redirect
+                session_unset();
+                session_destroy();
+            
                 header('Location: index.html?signedup=1');
                 exit();
             } else {
