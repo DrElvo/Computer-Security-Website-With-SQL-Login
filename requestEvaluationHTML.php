@@ -1,3 +1,9 @@
+<?php
+    session_start();
+    $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+?>
+
+
 <html>
 <head>
     <meta charset="utf-8">
@@ -12,7 +18,7 @@
 <body onload="intialise_page()">
 
 <section id="login">
-    <h1>Request Evaluation: <a href="Home.html">Home</a></h1>
+    <h1>Request Evaluation: <a href="home.php">Home</a></h1>
     <form action="requestEvaluation.php" method="post" id="commentForm">
         <label for="comment">Please comment your evaluation request: </label>
         <input type="text" id="comment" name="comment" placeholder="Comment" onkeyup='check();' required>
@@ -36,7 +42,7 @@
     }
 
     function check()  {
-        
+
         var comment = document.getElementById('comment').value;
 
         if (comment == '') {
