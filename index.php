@@ -1,3 +1,7 @@
+
+
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -5,16 +9,13 @@
     <link href="style.css" rel="stylesheet" type="text/css">
     <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
     <style>
-        #signup{
-            display:none;
-        }
     </style>
 </head>
 
 <body onload="check()">
 
     <div class="Login-Cont">
-        <h1> <a href="login.html">Login</a> <a href="signup.html">Signup</a></h1>
+        <h1> <a href="loginMain.php">Login</a> <a href="signup.html">Signup</a> <a href="forgotPasswordHome.html">ForgotPassword</a></h1>
     </div>
 
     <script>
@@ -25,6 +26,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const signedup = urlParams.get('signedup');
         const verified = urlParams.get('verified');
+        const resetLink = urlParams.get('resetLink');
+        const expired = urlParams.get('expired');
+        const lockout = urlParams.get('lockout');
 
         if (signedup === '1') {
             alert('Your account has been signed up');
@@ -35,6 +39,24 @@
         if (verified === '1') {
             alert('Your account is already verified');
             urlParams.delete('verified');
+            const newURL = window.location.pathname + '?' + urlParams.toString();
+            history.replaceState(null, '', newURL);
+        }
+        if (resetLink === '1') {
+            alert('If an account with this email is found, a reset link will have been sent');
+            urlParams.delete('verified');
+            const newURL = window.location.pathname + '?' + urlParams.toString();
+            history.replaceState(null, '', newURL);
+        }
+        if (expired === '1') {
+            alert('The verification code for this account has expired, check your email for a new one');
+            urlParams.delete('expired');
+            const newURL = window.location.pathname + '?' + urlParams.toString();
+            history.replaceState(null, '', newURL);
+        }
+        if (lockout === '1') {
+            alert('This account has been locked out, try again later');
+            urlParams.delete('lockout');
             const newURL = window.location.pathname + '?' + urlParams.toString();
             history.replaceState(null, '', newURL);
         }

@@ -1,48 +1,36 @@
 <?php
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
+require 'email.php';
 require 'vendor/autoload.php';
-
-session_start();
-
-include_once 'databaseConnect.php';
 
 #INITIALISE CAPTCHA
 
-$reCaptchaSecretKey = '6LdrRiIpAAAAAPp850fkuM1Hz7UgxifNGt7tX3Hk';
+include_once 'captcha.php';
 
-if (!isset($_POST['token']) || empty($_POST['token'])) {
-    $token = $_POST['token'];
-    echo 'Debugging Token: ' . $token . '<br>';
-    exit('reCAPTCHA token missing or empty');
-}
+#INITIALISE SESSION
 
-$token = $_POST['token'];
+session_start();
 
-$url = 'https://www.google.com/recaptcha/api/siteverify';
-$response = file_get_contents($url . '?secret=' . $reCaptchaSecretKey . '&response=' . $token);
+#INITIALISE DATABASE
 
-$result = json_decode($response);
+include_once 'databaseConnect.php';
 
-if (!$result->success) {
-    exit('reCAPTCHA verification failed: ' . $response);
-}
+#CHECK LOGIN CREDENTIALS
 
-#CHECK SIGNUP CREDENTIALS
-
-if (!isset($_POST['username_signup'], $_POST['password_signup'], $_POST['email'], $_POST['phoneNumber'])) {
+if (!isset($_POST['username_signup'], $_POST['password_signup'], $_POST['email'], $_POST['phoneNumber'], $_POST["confirm_password"])) {
     exit('Please fill all fields available');
 }
 
 $username = $_POST['username_signup'];
 $email = $_POST['email'];
 $password = $_POST["password_signup"];
+$password_confirm = $_POST["confirm_password"];
 $phoneNumber = $_POST['phoneNumber'];
 
-$mail = new PHPMailer(true);
+if ($password_confirm != $password){
+    header('location: Signup.html?passfail=1');
+    exit();
+}
 
 $check_query = "SELECT username, email FROM accounts WHERE username = ? OR email = ?";
 $check_stmt = $con->prepare($check_query);
@@ -73,9 +61,8 @@ if ($check_stmt) {
             $stmt->bind_param('sssss', $username, $hashed_password, $email, $phoneNumber, $verification_code);
 
             if ($stmt->execute()) {
-                
+        
                 $stmt->close();
-
                 $stmt = $con->prepare('SELECT id FROM accounts WHERE username = ?');
                 $stmt->bind_param('s', $username);
                 $stmt->execute();
@@ -83,46 +70,19 @@ if ($check_stmt) {
                 $stmt->bind_result($id);
                 $stmt->fetch();
                 
-                try {
+                $subject = 'Email_Verification';
+                $body = '<p>Your verification code is:    <b style="font-size: 30px;">' . $verification_code. '</b></p>' . 
 
-                    $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-        
-                    $mail->isSMTP();
-        
-                    $mail->Host = 'smtp.gmail.com';
-        
-                    $mail->SMTPAuth = true;
-        
-                    $mail->Username = 'humphrey.tomw@gmail.com';
-        
-                    $mail->Password = 'eshi jufi eosr jkrp';
-        
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        
-                    $mail->Port = 587;
-        
-                    $mail->setFrom('humphrey.tomw@gmail.com', 'adnan-tech.com');
-        
-                    $mail->addAddress($email, $username);
-        
-                    $mail->isHTML(true);
-        
-                    $mail->Subject = 'Email_Verification';
+                "http://localhost/PHP/confirm.php?linked=1&id=$id&verificationCode=$verification_code";
 
-                    $mail->Body = '<p>Your verification code is:    <b style="font-size: 30px;">' . $verification_code. '</b></p>' . 
-                    
-                    "http://localhost/PHP/confirm.html?linked=1&id=$id&verificationCode=$verification_code"
-                    
-                    ;
-        
-                    $mail->send();
-        
-                    } catch (Exception $e) {
-        
-                        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-        
-                    }
+                sendEmail($email, $username, $subject, $body);
 
+                $verifiedExpiry = date('Y-m-d H:i:s', strtotime('+240 seconds'));
+
+                $stmt = $con->prepare('UPDATE accounts SET verifiedExpiry = ? WHERE username = ?');
+                $stmt->bind_param('ss', $verifiedExpiry, $username);
+                $stmt->execute();
+                
                 $stmt->close();        
                 $con->close();
             

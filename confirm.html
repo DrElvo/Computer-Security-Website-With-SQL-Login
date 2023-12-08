@@ -16,14 +16,12 @@
         <div>
             <section id="login">
                 <h1>Confirm code:</h1>
-                <input type="text" id="confirm_code" name="confirm_code" placeholder="Confirmation Code" oninput='check();' required inputmode="numeric" pattern="[0-9]*" min="0">
+                <input type="text" id="confirm_code" name="confirm_code" placeholder="Account Verification Code: " oninput='check();' required inputmode="numeric" pattern="[0-9]*" min="0">
                 <button type="submit" id="submit">Submit</button>
                 <span id='message'></span>
             </section>
         </div>
     </form>
-
-    
     <script>
         var confirmCode = document.getElementById('confirm_code');
 
@@ -35,10 +33,22 @@
         inialisePage = function(){
             incorrect()
             check()
-            emailLink()
+            
         }
 
-        var check = function() {
+        function incorrect() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const incorrect = urlParams.get('incorrect');
+
+            if (incorrect === '1') {
+                alert('Your confirmation code was incorrect');
+                urlParams.delete('incorrect');
+                const newURL = window.location.pathname + '?' + urlParams.toString();
+                history.replaceState(null, '', newURL);
+            }
+        }
+
+        function check() {
             var code = confirmCode.value;
 
             if (code.length < 6) {
@@ -52,50 +62,6 @@
                 document.getElementById('message').innerHTML = 'Ready';
                 document.getElementById('submit').disabled = false;
             }
-        }
-
-        emailLink = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const success = urlParams.get('linked');
-        if (success === '1') {
-            
-            const codeVal = urlParams.get('verificationCode')
-            const idVal = urlParams.get('id')
-
-            const form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', 'confirm.php');
-            
-            const confirm_code = document.createElement('input');
-            confirm_code.setAttribute('type','hidden');
-            confirm_code.setAttribute('name','confirm_code');
-            confirm_code.setAttribute('value', codeVal);
-            form.appendChild(confirm_code);
-
-            const id = document.createElement('input');
-            id.setAttribute('type','hidden');
-            id.setAttribute('name','id');
-            id.setAttribute('value', idVal);
-            form.appendChild(id);
-
-            document.body.appendChild(form);
-
-            form.submit();
-        }
-        }
-
-        function incorrect() {
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const incorrect = urlParams.get('incorrect');
-
-        if (incorrect === '1') {
-            alert('Your confirmation code was incorrect');
-            urlParams.delete('incorrect');
-            const newURL = window.location.pathname + '?' + urlParams.toString();
-            history.replaceState(null, '', newURL);
-        }
-
         }
 
     </script>
