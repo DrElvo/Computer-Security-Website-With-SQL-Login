@@ -50,6 +50,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION["loggedin"])){
     $stmt->bind_param('sssss', $id, $comment, $contact, $contactType, $postedOn);
     $stmt->execute();
     $stmt->close();
+    if($id == 1){
+        header('Location: adminHome.html');
+    }
+
     header('Location: home.html?posted=1');
     exit();
 
