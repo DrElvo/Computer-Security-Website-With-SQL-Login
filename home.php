@@ -1,20 +1,28 @@
+<?php
+
+#INITIALISE SESSION
+
+session_start();
+
+if($_SESSION['id'] == 1){
+    header('location: adminHome.php');
+}
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Home</title>
     <link href="style.css" rel="stylesheet" type="text/css">
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
-    <style>
-    </style>
 </head>
 
 <body onload="confirmed()">
     <div>
-    <h1>Home: <a href="requestEvaluation.html">Request Evaluation</a></h1>
+    <h1>Home: <a href="requestEvaluationHTML.php">Request Evaluation</a></h1>
     </div>
    <div class="Login-Cont">
-    
 
         <h1> You have successfully logged in </h1>
 

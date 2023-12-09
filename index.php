@@ -4,15 +4,12 @@
     <meta charset="utf-8">
     <title>Login</title>
     <link href="style.css" rel="stylesheet" type="text/css">
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
-    <style>
-    </style>
 </head>
 
 <body onload="check()">
 
     <div class="Login-Cont">
-        <h1> <a href="loginMain.php">Login</a> <a href="signup.html">Signup</a> <a href="forgotPasswordHome.html">ForgotPassword</a></h1>
+        <h1> <a href="loginHTML.php">Login</a> <a href="signupHTML.php">Signup</a> <a href="forgotPasswordHomeHTML.php">ForgotPassword</a></h1>
     </div>
 
     <script>

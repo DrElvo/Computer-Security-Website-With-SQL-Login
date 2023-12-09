@@ -4,12 +4,8 @@
     <meta charset="utf-8">
     <title>Display Comments</title>
     <link href="style.css" rel="stylesheet" type="text/css">
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
-    <style>
-    </style>
 </head>
-
-<h2>All Comments</h2>
+<h1>All Comments: <a href="adminHome.php">Home</a></h1>
 
 <table id="commentsTable">
     <tr>
@@ -19,11 +15,12 @@
         <th>Contact</th>
         <th>Contact Type</th>
         <th>Posted On</th>
+        <th>File Name</th>
+        <th>Images</th>
     </tr>
 </table>
 
 <script>
-    // Use AJAX to fetch comments from the PHP file
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {

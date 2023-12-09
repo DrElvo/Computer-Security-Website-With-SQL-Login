@@ -6,6 +6,10 @@ require 'email.php';
 include_once 'databaseConnect.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" ){
+
+    if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
+        exit('Invalid Session');
+    }
     
     if (isset($_POST['id'])) {
 
@@ -31,11 +35,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" ){
     $confirmationCode = $_GET['verificationCode'];
     
 } else {
-    header('index.html');
+    header('index.php');
     exit();
 }
 
-$stmt = $con->prepare('SELECT email, username, verifyCode, verified, verifiedExpiry FROM accounts WHERE id = ?');
+$stmt = $con->prepare('SELECT encryptedEmail, username, verifyCode, verified, verifiedExpiry, iv FROM accounts WHERE id = ?');
 if (!$stmt) {
     die('Error in SQL query: ' . $con->error);
 }
@@ -43,11 +47,14 @@ if (!$stmt) {
 $stmt->bind_param('i', $id);
 $stmt->execute();
 $stmt->store_result();
-$stmt->bind_result($email,$username,$verifyCode,$verified,$verifiedExpiry);
+$stmt->bind_result($encryptedEmail,$username,$verifyCode,$verified,$verifiedExpiry,$iv);
 $stmt->fetch();
 
+$secretKey = 'ASuperSecretKey';
+$email = openssl_decrypt($encryptedEmail, 'aes-256-cbc', $secretKey, 0, $iv);
+            
 if($verified == 1){
-    header('Location: index.html?verified=1');
+    header('Location: index.php?verified=1');
     exit();
 }
 
@@ -68,7 +75,7 @@ if ($verifiedExpiry <= $time){
     $stmt->bind_param('sss', $verifiedExpiry, $verification_code, $username);
     $stmt->execute();
 
-    header('Location: index.html?expired=1');
+    header('Location: index.php?expired=1');
     exit();
 
 }
@@ -80,7 +87,7 @@ if ($confirmationCode == $verifyCode) {
 
     if ($update_stmt->execute()) {
         $update_stmt->close();
-        header('Location: home.html?confirmed=1');
+        header('Location: home.php?confirmed=1');
         exit();
 
     } else {
@@ -88,7 +95,7 @@ if ($confirmationCode == $verifyCode) {
     }
 
 } else {
-    header('Location: confirm.html?incorrect=1');
+    header('Location: confirmHTML.php?incorrect=1');
     exit();
 }
 

@@ -1,29 +1,43 @@
+<?php
+    session_start();
+    $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+?>
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirm</title>
+    <title>Forgot Password Email</title>
     <link href="style.css" rel="stylesheet" type="text/css">
     <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
-    <style>
-        #signup{
-            display:none;
-        }
-    </style>
 </head>
 
 <body onload="check()">
+    <h1><a href="loginHTML.php">Login</a><a href="signupHTML.php">Signup</a> <a href="index.php">Home</a></h1>
     <form action="forgotPasswordHome.php" method="POST">
         <div>
             <section id="login">
                 <h1>Enter Email: </h1>
                 <input type="email" id="email" name="email" placeholder="Email" onkeyup='check();' required>
-                <button type="submit" id="submit">Submit</button>
+                <button type="submit" id="submit" onclick="getRecaptchaToken()">Submit</button>
                 <span id='message'></span>
             </section>
         </div>
     </form>
 
     <script>
+
+        function getRecaptchaToken() {
+            grecaptcha.ready(function () {
+                grecaptcha.execute('6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx', { action: 'submit' }).then(function (token) {
+                    formAction = 'login.php'
+
+                    document.getElementById('token').value = token;
+                    document.getElementById('submit_login').formAction = formAction;
+                    document.getElementById('submit_login').form.submit();
+                });
+            });
+        }
 
         function check() {
 

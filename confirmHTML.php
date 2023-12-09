@@ -1,14 +1,14 @@
+<?php
+    session_start();
+    $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+?>
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Confirm</title>
     <link href="style.css" rel="stylesheet" type="text/css">
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
-    <style>
-        #signup{
-            display:none;
-        }
-    </style>
 </head>
 
 <body onload="inialisePage()">
@@ -16,6 +16,7 @@
         <div>
             <section id="login">
                 <h1>Confirm code:</h1>
+                <input type="hidden" name= "sessionToken" value = "<?php echo isset($_SESSION['sessionToken']) ? htmlspecialchars($_SESSION['sessionToken']) : ''; ?>" >
                 <input type="text" id="confirm_code" name="confirm_code" placeholder="Account Verification Code: " oninput='check();' required inputmode="numeric" pattern="[0-9]*" min="0">
                 <button type="submit" id="submit">Submit</button>
                 <span id='message'></span>

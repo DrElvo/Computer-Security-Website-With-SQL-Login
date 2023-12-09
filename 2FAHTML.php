@@ -1,14 +1,14 @@
+<?php
+    session_start();
+    $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+?>
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirm</title>
+    <title>2FA</title>
     <link href="style.css" rel="stylesheet" type="text/css">
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
-    <style>
-        #signup{
-            display:none;
-        }
-    </style>
 </head>
 
 <body onload="inialisePage()">
@@ -16,8 +16,9 @@
         <div>
             <section id="login">
                 <h1>Authenticator code:</h1>
+                <input type="hidden" name= "sessionToken" value = "<?php echo isset($_SESSION['sessionToken']) ? htmlspecialchars($_SESSION['sessionToken']) : ''; ?>" >
                 <input type="text" id="authenticator_code" name="authenticator_code" placeholder="Authenticator Code" oninput='check();' required inputmode="numeric" pattern="[0-9]*" min="0">
-                <button type="submit" id="submit">Submit</button>
+                <button type="submit" id="submit" >Submit</button>
                 <span id='message'></span>
             </section>
         </div>

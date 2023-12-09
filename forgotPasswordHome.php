@@ -4,6 +4,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
+require 'email.php';
 require 'vendor/autoload.php';
 
 #INITIALISE CAPTCHA
@@ -28,53 +29,65 @@ $email = $_POST['email'];
 
 #PREPARE SQL STATEMENT
 
+$secretKey = 'ASuperSecretKey';
 
-if ($stmt = $con->prepare('SELECT username FROM accounts WHERE email = ?')) {
-    $stmt->bind_param('s', $email);
-    $stmt->execute();
-    $stmt->store_result();
+$check_query = "SELECT encryptedEmail, iv FROM accounts";
+$check_stmt = $con->prepare($check_query);
 
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($username);
-        $stmt->fetch();
+if ($check_stmt) {
+    $check_stmt->execute();
+    $result = $check_stmt->get_result();
 
-        try {
-            $passToken = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+    while ($row = $result->fetch_assoc()) {
 
-            $stmt = $con->prepare('UPDATE accounts SET passwordToken = ? WHERE email = ?');
+        $encryptedEmail = $row['encryptedEmail'];
+        $iv = $row['iv'];
 
-            if (!$stmt) {
-                exit('Error in SQL statement: ' . $con->error);
+        $decryptedEmail = openssl_decrypt($encryptedEmail, 'aes-256-cbc', $secretKey, 0, $iv);
+
+        if ($decryptedEmail === $email) {
+
+            if ($stmt = $con->prepare('SELECT username FROM accounts WHERE encryptedEmail = ?')) {
+                $stmt->bind_param('s', $encryptedEmail);
+                $stmt->execute();
+                $stmt->store_result();
+
+                if ($stmt->num_rows > 0) {
+                    $stmt->bind_result($username);
+                    $stmt->fetch();
+
+                    try {
+                        $passToken = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+
+                        $stmt = $con->prepare('UPDATE accounts SET passwordToken = ? WHERE encryptedEmail = ?');
+
+                        if (!$stmt) {
+                            exit('Error in SQL statement: ' . $con->error);
+                        }
+
+                        $stmt->bind_param('ss', $passToken, $email);
+
+                        if ($stmt->execute()) {
+                            
+                            $subject = 'Password Reset Link';
+                            $body = "http://localhost/PHP/forgotPasswordInput.php?linked=1&email=$email&passToken=$passToken";
+                            sendEmail($email, $username, $subject, $body);
+
+                        }
+
+                        } catch (Exception $e) {
+                            echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                        }
+                    
+                    }
+                    header('Location: index.php?resetLink=1');
+                        exit();
+                }
+
             }
-
-            $stmt->bind_param('ss', $passToken, $email);
-
-            if ($stmt->execute()) {
-                $mail = new PHPMailer(true);
-                $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'humphrey.tomw@gmail.com';
-                $mail->Password = 'eshi jufi eosr jkrp';
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = 587;
-                $mail->setFrom('humphrey.tomw@gmail.com', 'adnan-tech.com');
-                $mail->addAddress($email, $username);
-                $mail->isHTML(true);
-                $mail->Subject = 'Password Reset Link';
-                $mail->Body = "http://localhost/PHP/forgotPasswordInput.php?linked=1&email=$email&passToken=$passToken";
-                $mail->send();
-            }
-
-        
-            } catch (Exception $e) {
-                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-            }
-        
         }
-        header('Location: index.html?resetLink=1');
-            exit();
-    }
+} else {
+exit('Error in SQL statement: ' . $con->error);
+}
 
 

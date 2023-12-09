@@ -1,27 +1,40 @@
+<?php
+    session_start();
+    $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+?>
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Login</title>
     <link href="style.css" rel="stylesheet" type="text/css">
     <script src="https://www.google.com/recaptcha/api.js?render=6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx"></script>
-    <style>
-    </style>
 </head>
 
 
 <body onload="intialise_page()">
 
 <section id="signup">
-    <h1>Sign Up: <a href="login.html">Login</a> <a href="index.html">Home</a></h1>
+    <h1>Sign Up: <a href="loginHTML.php">Login</a> <a href="index.php">Home</a></h1>
     <form action="signup.php" method="post" id="signupForm">
-        <input type="text" id="username_signup" name="username_signup" placeholder="Username" onkeyup='check_signup();' required>
-        <input type="email" id="email" name="email" placeholder="Email" onkeyup='check_signup();' required>
-        <input type="phoneNumber" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" onkeyup='check_signup();' required>
-        <input type="password" name="password_signup" id="password_signup"  placeholder="Password" onkeyup='check_signup();' required/>
-        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" onkeyup='check_signup();' required/>
+        <input type="hidden" name= "sessionToken" value = "<?php echo isset($_SESSION['sessionToken']) ? $_SESSION['sessionToken'] : ''; ?>" >
+        <input type="text" id="username_signup" name="username_signup" placeholder="Username" onkeyup='test_page();' required>
+        <br></br>
+        <input type="email" id="email" name="email" placeholder="Email" onkeyup='test_page();' required>
+        <br></br>
+        <input type="phoneNumber" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" onkeyup='test_page();' required>
+        <br></br>
+        <input type="password" name="password_signup" id="password_signup"  placeholder="Password" onkeyup='test_page();' required/>
+        <br></br>
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" onkeyup='test_page();' required/>
+        <br></br>
+        <span id='message_signup'></span>
+        <br></br>
+        <span id='passwordStrength'></span> 
+        <br></br>
         <input type="hidden" name="token" id="token"> 
         <button type="button" id="submit_signup" onclick="getRecaptchaToken()">Sign Up</button>
-        <span id='message_signup'></span>
     </form>
 </section>
 
@@ -33,11 +46,7 @@
         grecaptcha.ready(function () {
             grecaptcha.execute('6LdrRiIpAAAAAPNvdZx84VErn6h5RD-E0aPRVbpx', { action: 'submit' }).then(function (token) {
                 formAction = 'signup.php'
-
-                // Set the token value in the respective form
                 document.getElementById('token').value = token;
-
-                // Set the form action and submit based on the formAction parameter
                 document.getElementById('submit_signup').formAction = formAction;
                 document.getElementById('submit_signup').form.submit();
             });
@@ -47,6 +56,12 @@
     function intialise_page() {
         confirmed()
         check_signup();
+        password_strength();
+    }
+
+    function test_page() {
+        check_signup();
+        password_strength();
     }
 
     var check_signup = function() {
@@ -69,6 +84,39 @@
             document.getElementById('submit_signup').disabled = false;
         }
     }
+
+    var password_strength = function() {
+        const userInput = document.getElementById('password_signup').value;
+
+        const lengthRegex = /^.{8,}$/; // Checks for a minimum length of 8 characters
+        const numberRegex = /\d/;      // Checks for at least one digit
+        const specialCharRegex = /[!@#$%^&*()_+[\]{};':"\\|,.<>/?-]/; // Checks for special characters
+
+        const isLengthValid = lengthRegex.test(userInput);
+        const hasNumber = numberRegex.test(userInput);
+        const hasSpecialChar = specialCharRegex.test(userInput);
+
+        let message = '';
+        let color = '';
+
+        if (!isLengthValid) {
+            message = 'Password should be at least 8 characters long.';
+            color = 'red';
+        } else if (!hasNumber) {
+            message = 'Password should contain at least one digit.';
+            color = 'orange';
+        } else if (!hasSpecialChar) {
+            message = 'Password should contain at least one special character.';
+            color = 'yellow';
+        } else {
+            message = 'Password meets complexity requirements.';
+            color = 'green';
+        }
+
+        const passwordStrength = document.getElementById('passwordStrength');
+        passwordStrength.textContent = message;
+        passwordStrength.style.color = color;
+        }
 
     function confirmed() {
 

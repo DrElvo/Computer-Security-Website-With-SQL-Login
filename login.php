@@ -22,7 +22,7 @@ if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
 }
 
 if ( !isset($_POST['username_login'], $_POST['password_login']) ) {
-    header('Location: Login.html?incorrect=2');
+    header('Location: LoginHTML.php?incorrect=2');
 	exit();
 }
 
@@ -42,27 +42,32 @@ if($username == 'admin'){
         header('Location: adminHome.php');
         exit();
     }
+    header('Location: loginHTML.php?incorrect=1');
+    exit();
 }
 
 #PREPARE SQL STATEMENT
 
-if ($stmt = $con->prepare('SELECT id, password, email, verified, verifiedExpiry, lockout, passwordLockoutCount FROM accounts WHERE username = ?')) {
+if ($stmt = $con->prepare('SELECT id, password, encryptedEmail, verified, iv, verifiedExpiry, lockout, passwordLockoutCount FROM accounts WHERE username = ?')) {
     $stmt->bind_param('s', $username);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($id, $password, $email, $verified, $verifiedExpiry, $lockout, $lockCount);
+        $stmt->bind_result($id, $password, $encryptedEmail, $verified, $iv, $verifiedExpiry, $lockout, $lockCount);
         $stmt->fetch();
         $time = date('Y-m-d H:i:s'); 
 
         if ($lockout >= $time){
-            header('Location: index.html?lockout=1');
+            header('Location: index.php?lockout=1');
             exit();
         }
         
         if (password_verify($_POST['password_login'], $password)) {
             session_regenerate_id();
+            
+            $secretKey = 'ASuperSecretKey';
+            $email = openssl_decrypt($encryptedEmail, 'aes-256-cbc', $secretKey, 0, $iv);
             
             $_SESSION['id'] = $id;
             if($verified == 0){
@@ -70,6 +75,7 @@ if ($stmt = $con->prepare('SELECT id, password, email, verified, verifiedExpiry,
                     
                     $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
                     $verifiedExpiry = date('Y-m-d H:i:s', strtotime('+240 seconds'));
+                    
                     $subject = 'Email_Verification';
                     $body = '<p>Your verification code is:    <b style="font-size: 30px;">' . $verification_code. '</b></p>' . 
 
@@ -81,11 +87,11 @@ if ($stmt = $con->prepare('SELECT id, password, email, verified, verifiedExpiry,
                     $stmt->bind_param('sss', $verifiedExpiry, $verification_code, $username);
                     $stmt->execute();
 
-                    header('Location: index.html?expired=1');
+                    header('Location: index.php?expired=1');
                     exit();
                     
                 }
-                header('Location: confirm.html');
+                header('Location: confirmHTML.php');
                 exit();
 
             }else{
@@ -101,7 +107,7 @@ if ($stmt = $con->prepare('SELECT id, password, email, verified, verifiedExpiry,
 
                 sendEmail($email, $username, $subject, $body);
 
-                header('Location: 2FA.html');
+                header('Location: 2FAHTML.php');
                 exit();
      
             }
@@ -117,7 +123,7 @@ if ($stmt = $con->prepare('SELECT id, password, email, verified, verifiedExpiry,
                 $stmt = $con->prepare('UPDATE accounts SET passwordLockoutCount = ?, lockout = ? WHERE username = ?');
                 $stmt->bind_param('sss',$lockCount, $lockout, $username);
                 $stmt->execute();
-                header('Location: index.html?lockout=1');
+                header('Location: index.php?lockout=1');
                 exit();
             }
 
@@ -125,11 +131,11 @@ if ($stmt = $con->prepare('SELECT id, password, email, verified, verifiedExpiry,
             $stmt->bind_param('ss', $lockCount, $username);
             $stmt->execute();
 
-            header('Location: Login.html?incorrect=1');
+            header('Location: loginHTML.php?incorrect=1');
             exit();
         }
     } else {
-        header('Location: Login.html?incorrect=1');
+        header('Location: loginHTML.php?incorrect=1');
         exit();
     }
     
