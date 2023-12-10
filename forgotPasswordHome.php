@@ -1,9 +1,5 @@
 <?php
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 require 'email.php';
 require 'vendor/autoload.php';
 
@@ -21,6 +17,10 @@ include_once 'databaseConnect.php';
 
 #CHECK SIGNUP CREDENTIALS
 
+if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
+    exit('Invalid Session');
+}
+
 if (!isset($_POST['email'])) {
     exit('Please fill in email field');
 }
@@ -31,8 +31,7 @@ $email = $_POST['email'];
 
 $secretKey = 'ASuperSecretKey';
 
-$check_query = "SELECT encryptedEmail, iv FROM accounts";
-$check_stmt = $con->prepare($check_query);
+$check_stmt = $con->prepare('SELECT id, encryptedEmail, iv FROM accounts');
 
 if ($check_stmt) {
     $check_stmt->execute();
@@ -40,6 +39,7 @@ if ($check_stmt) {
 
     while ($row = $result->fetch_assoc()) {
 
+        $id = $row['id'];
         $encryptedEmail = $row['encryptedEmail'];
         $iv = $row['iv'];
 
@@ -56,29 +56,24 @@ if ($check_stmt) {
                     $stmt->bind_result($username);
                     $stmt->fetch();
 
-                    try {
-                        $passToken = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+                    $passToken = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
 
-                        $stmt = $con->prepare('UPDATE accounts SET passwordToken = ? WHERE encryptedEmail = ?');
+                    $stmt = $con->prepare('UPDATE accounts SET passwordToken = ? WHERE encryptedEmail = ?');
 
-                        if (!$stmt) {
-                            exit('Error in SQL statement: ' . $con->error);
-                        }
+                    if (!$stmt) {
+                        exit('Error in SQL statement: ' . $con->error);
+                    }
 
-                        $stmt->bind_param('ss', $passToken, $email);
+                    $stmt->bind_param('ss', $passToken, $encryptedEmail);
 
-                        if ($stmt->execute()) {
-                            
-                            $subject = 'Password Reset Link';
-                            $body = "http://localhost/PHP/forgotPasswordInput.php?linked=1&email=$email&passToken=$passToken";
-                            sendEmail($email, $username, $subject, $body);
+                    if ($stmt->execute()) {
+                        $subject = 'Password Reset Link';
+                        $body = "http://localhost/PHP/forgotPasswordInput.php?linked=1&id=$id&passToken=$passToken";
+                        sendEmail($email, $username, $subject, $body);
+                    } else {
+                        exit('Error in SQL statement: ' . $con->error);
+                    }
 
-                        }
-
-                        } catch (Exception $e) {
-                            echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                        }
-                    
                     }
                     header('Location: index.php?resetLink=1');
                         exit();

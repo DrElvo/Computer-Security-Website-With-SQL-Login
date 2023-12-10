@@ -18,6 +18,7 @@
         <div>
             <section id="login">
                 <h1>Enter Email: </h1>
+                <input type="hidden" name= "sessionToken" value = "<?php echo isset($_SESSION['sessionToken']) ? htmlspecialchars($_SESSION['sessionToken']) : ''; ?>" >
                 <input type="email" id="email" name="email" placeholder="Email" onkeyup='check();' required>
                 <button type="submit" id="submit" onclick="getRecaptchaToken()">Submit</button>
                 <span id='message'></span>

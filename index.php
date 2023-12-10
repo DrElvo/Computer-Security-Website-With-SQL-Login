@@ -23,7 +23,14 @@
         const resetLink = urlParams.get('resetLink');
         const expired = urlParams.get('expired');
         const lockout = urlParams.get('lockout');
+        const success = urlParams.get('confirmed'); 
 
+        if (success === '1') {
+            alert('Your account has been confirmed');
+            urlParams.delete('confirmed');
+            const newURL = window.location.pathname + '?' + urlParams.toString();
+            history.replaceState(null, '', newURL);
+        }
         if (signedup === '1') {
             alert('Your account has been signed up');
             urlParams.delete('signedup');

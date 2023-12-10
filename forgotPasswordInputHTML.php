@@ -1,3 +1,9 @@
+<?php
+    session_start();
+    $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+    $question = $_SESSION['question'];
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,8 +17,17 @@
         <div>
             <section id="login">
                 <h1>New Password:</h1>
+                <label for="password">Your New Password:</label>
                 <input type="password" name="password" id="password"  placeholder="Password" onkeyup='check();' required/>
+                <br></br>
+                <label for="confirm_password">Repeat Your Passwordr</label>
                 <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" onkeyup='check();' required/>
+                <br></br>
+                <label>Your question is: <?php echo $question; ?></label>
+                <br></br>
+                <label for="answer">Your Answer:</label>
+                <input type="text" name="answer" id="answer" placeholder="Answer" onkeyup='check();' required>
+                <br></br>
                 <button type="submit" id="submit">Submit</button>
                 <span id='message'></span>
             </section>

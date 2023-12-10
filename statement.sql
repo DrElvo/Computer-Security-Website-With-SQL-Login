@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS accounts (
     `encryptedEmail` varbinary(2048) NOT NULL,
     `encryptedNumber` varbinary(2048) NOT NULL,
     `verifyCode` varchar(6) NOT NULL,
+    `encryptedQuestion` varbinary(2048) NOT NULL,
+    `encryptedAnswer` varbinary(2048) NOT NULL,
     `iv` varbinary(16) NOT NULL,
     `verified` TINYINT(1) NOT NULL DEFAULT 0,
     `passwordLockoutCount` TINYINT(1) NOT NULL DEFAULT 0,

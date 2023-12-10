@@ -32,8 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" ){
     }
 } else if (isset($_GET['verificationCode']) && isset($_GET['id'])) {
     $id = $_GET['id'];
-    $confirmationCode = $_GET['verificationCode'];
-    
+    $confirmationCode = $_GET['verificationCode']; 
 } else {
     header('index.php');
     exit();
@@ -61,7 +60,6 @@ if($verified == 1){
 $time = date('Y-m-d H:i:s'); 
 
 if ($verifiedExpiry <= $time){
-    
     $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
     $verifiedExpiry = date('Y-m-d H:i:s', strtotime('+240 seconds'));
     $subject = 'Email_Verification';
@@ -77,7 +75,6 @@ if ($verifiedExpiry <= $time){
 
     header('Location: index.php?expired=1');
     exit();
-
 }
 
 if ($confirmationCode == $verifyCode) {
@@ -87,7 +84,7 @@ if ($confirmationCode == $verifyCode) {
 
     if ($update_stmt->execute()) {
         $update_stmt->close();
-        header('Location: home.php?confirmed=1');
+        header('Location: index.php?confirmed=1');
         exit();
 
     } else {

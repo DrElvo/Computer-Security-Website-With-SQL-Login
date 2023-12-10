@@ -2,6 +2,11 @@
 
 require 'email.php';
 require 'vendor/autoload.php';
+require_once 'IPblock.php';
+
+#CHECK BLOCKED IPS (this is a manual process, but an implementation could include and automatic blocker of ips)
+
+blockIP();
 
 #INITIALISE CAPTCHA
 
