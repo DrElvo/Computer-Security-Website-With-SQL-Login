@@ -39,13 +39,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     $encryptedAnswer = $_SESSION['encryptedAnswer']; 
     $iv = $_SESSION['iv'];
 
-    if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/^.{8,}$/', $password) || !preg_match('/\d/', $password) || !preg_match('/[!@#$%^&*()_+[\]{};\\:|"\\\'<>,.?\/\\-]/', $password)) {
+    if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/^.{8,}$/', $password) 
+     || !preg_match('/\d/', $password) || !preg_match('/[!@#$%^&*()_+[\]{};\\:|"\\\'<>,.?\/\\-]/', $password)) {
         header('location: forgotPasswordInputHTML.php?passfail=1');
         exit('password does not fit security requirements');
     }
 
     if ($confirm_password === $password){
-        $decryptedAnswer = openssl_decrypt($encryptedAnswer, 'aes-256-cbc', $secretKey, 0, $iv);
+
         if (!password_verify($answer, $encryptedAnswer)){
             header('Location: index.php');
             exit('wrong security question answer');

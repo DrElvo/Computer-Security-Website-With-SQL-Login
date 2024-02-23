@@ -13,18 +13,18 @@
 </head>
 
 <body onload="check()">
+
+<section id="forgotPassword">
     <h1><a href="loginHTML.php">Login</a><a href="signupHTML.php">Signup</a> <a href="index.php">Home</a></h1>
     <form action="forgotPasswordHome.php" method="POST">
-        <div>
-            <section id="login">
-                <h1>Enter Email: </h1>
+                <label for="email"> Please enter your account email </label> 
                 <input type="hidden" name= "sessionToken" value = "<?php echo isset($_SESSION['sessionToken']) ? htmlspecialchars($_SESSION['sessionToken']) : ''; ?>" >
                 <input type="email" id="email" name="email" placeholder="Email" onkeyup='check();' required>
                 <button type="submit" id="submit" onclick="getRecaptchaToken()">Submit</button>
                 <span id='message'></span>
-            </section>
-        </div>
     </form>
+    </section>
+    </body>
 
     <script>
 
@@ -56,6 +56,6 @@
         }
 
     </script>
-</body>
+
 
 </html>

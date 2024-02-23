@@ -167,9 +167,9 @@
 
         const lowerRegex = /[a-z]/
         const upperRegex = /[A-Z]/
-        const lengthRegex = /^.{8,}$/; // Checks for a minimum length of 8 characters
-        const numberRegex = /\d/;      // Checks for at least one digit
-        const specialCharRegex = /[!@#$%^&*()_+[\]{};':"\\|,.<>/?-]/; // Checks for special characters
+        const lengthRegex = /^.{8,}$/; 
+        const numberRegex = /\d/;      
+        const specialCharRegex = /[!@#$%^&*()_+[\]{};':"\\|,.<>/?-]/; 
 
         const Lower = lowerRegex.test(userInput);
         const Upper = upperRegex.test(userInput);

@@ -2,9 +2,6 @@
 
 require 'vendor/autoload.php';
 
-#INITIALISE CAPTCHA
-
-include_once 'captcha.php';
 
 #INITIALISE SESSION
 
@@ -30,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION["loggedin"])){
 
     $target_dir = "uploads/";
     $originalFileName = $_FILES["fileToUpload"]["tmp_name"];
-    $fileName = $target_dir . 'id_' . $id . '_time_' . $postedOn . '_file_' . basename($_FILES["fileToUpload"]["name"]);
+    $fileName = htmlspecialchars(trim($target_dir . 'id_' . $id . '_time_' . $postedOn . '_file_' . basename($_FILES["fileToUpload"]["name"])));
 
     if (!file_exists($target_dir)) {
         mkdir($target_dir, 0777, true);
@@ -66,7 +63,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION["loggedin"])){
     }
     $stmt->bind_param('s', $id);
     if (!$stmt->execute()) {
-        exit('Error in SQL statement: ' . $con->error);
+        header('Location: index.php');
+        exit();
     }
 
     $stmt->bind_result($encryptedContact, $iv);
@@ -78,7 +76,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION["loggedin"])){
 
     $stmt = $con->prepare('INSERT INTO comments (id, comment, contact, contactType, postedOn, nameOfFile) VALUES (?, ?, ?, ?, ?, ?)');
     if (!$stmt) {
-        exit('Error in SQL statement: ' . $con->error);
+        header('Location: index.php');
+        exit();
     }
 
     $stmt->bind_param('ssssss', $id, $comment, $contact, $contactType, $postedOn, $fileName);

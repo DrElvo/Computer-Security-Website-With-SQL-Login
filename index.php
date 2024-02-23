@@ -9,13 +9,13 @@
 <body onload="check()">
 
     <div class="Login-Cont">
-        <h1> <a href="loginHTML.php">Login</a> <a href="signupHTML.php">Signup</a> <a href="forgotPasswordHomeHTML.php">ForgotPassword</a></h1>
+        <h1> Lovejoys Antiques</h1>
+        <h2> <a href="loginHTML.php">Login</a> <a href="signupHTML.php">Signup</a> <a href="forgotPasswordHomeHTML.php">ForgotPassword</a></h2>
     </div>
 
     <script>
         
         function check() {
-        //CHECKS WHETHER OR NOT THERE IS A TAG IN THE URL WHICH INDICATES THAT THE USER HAS JUST SIGNED UP, AND BEEN REDIRECTED BACK TO THE LOGIN PAGE
 
         const urlParams = new URLSearchParams(window.location.search);
         const signedup = urlParams.get('signedup');
@@ -45,7 +45,7 @@
         }
         if (resetLink === '1') {
             alert('If an account with this email is found, a reset link will have been sent');
-            urlParams.delete('verified');
+            urlParams.delete('resetLink');
             const newURL = window.location.pathname + '?' + urlParams.toString();
             history.replaceState(null, '', newURL);
         }

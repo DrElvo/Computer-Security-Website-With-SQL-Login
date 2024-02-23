@@ -40,14 +40,16 @@ if ($password_confirm !== $password){
     exit();
 }
 
-if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/^.{8,}$/', $password) || !preg_match('/\d/', $password) || !preg_match('/[!@#$%^&*()_+[\]{};\\:|"\\\'<>,.?\/\\-]/', $password)) {
+if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/^.{8,}$/', $password) 
+ || !preg_match('/\d/', $password) || !preg_match('/[!@#$%^&*()_+[\]{};\\:|"\\\'<>,.?\/\\-]/', $password)) {
     header('location: signupHTML.php?passfail=1');
     exit();
 }
 
 $check_stmt = $con->prepare('SELECT username FROM accounts WHERE username = ?');
 if (!$check_stmt) {
-    exit('Error in SQL statement' . $con->error);
+    header('Location: index.php');
+    exit('Invalid Session');
 }
 
 if ($check_stmt) {
@@ -85,13 +87,15 @@ if ($check_stmt) {
                     }
                 }
             } else {
-                exit('Error in SQL statement: ' . $con->error);
+                header('Location: index.php');
+                exit('Invalid Session');
             }
             $check_stmt->close();
             
             $stmt = $con->prepare('INSERT INTO accounts (username, password, encryptedEmail, encryptedNumber, verifyCode, encryptedQuestion, encryptedAnswer, iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
             if (!$stmt) {
-                exit('Error in SQL statement' . $con->error);
+                header('Location: index.php');
+                exit('Invalid Session');
             }
             
             $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
@@ -127,7 +131,8 @@ if ($check_stmt) {
                 $stmt = $con->prepare('UPDATE accounts SET verifiedExpiry = ? WHERE username = ?');
 
                 if (!$stmt) {
-                    exit('Error in SQL statement' . $con->error);
+                    header('Location: index.php');
+                    exit('Invalid Session');
                 }
 
                 $stmt->bind_param('ss', $verifiedExpiry, $username);
@@ -142,15 +147,18 @@ if ($check_stmt) {
                     header('Location: index.php?signedup=1');
                     exit();
                 } else {
-                    exit('Error executing query: ' . $stmt->error);
+                    header('Location: index.php');
+                    exit('Invalid Session');
                 }                
             } else {
-                exit('Error executing query: ' . $stmt->error);
+                header('Location: index.php');
+                exit('Invalid Session');
             }
         }
     }
     $check_stmt->close();
 } else {
-    exit('Error in SQL statement' . $con->error);
+    header('Location: index.php');
+    exit('Invalid Session');
 }
 ?>

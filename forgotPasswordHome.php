@@ -57,9 +57,9 @@ if ($check_stmt) {
                     $passToken = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
 
                     $stmt = $con->prepare('UPDATE accounts SET passwordToken = ? WHERE encryptedEmail = ?');
-
                     if (!$stmt) {
-                        exit('Error in SQL statement: ' . $con->error);
+                        header('Location: index.php');
+                        exit();
                     }
 
                     $stmt->bind_param('ss', $passToken, $encryptedEmail);
@@ -80,7 +80,8 @@ if ($check_stmt) {
             }
         }
 } else {
-exit('Error in SQL statement: ' . $con->error);
+    header('Location: index.php');
+    exit();
 }
 
 

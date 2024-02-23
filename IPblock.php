@@ -10,8 +10,8 @@ function blockIP() {
     $IP = $_SERVER['REMOTE_ADDR'];
 
     if (in_array($IP, $exampleBlackIPs)) {
-        header('HTTP/1.1 403 Forbidden');
-        exit();
+        header('location: index.php');
+        exit('IP found in blacklist');
     }
 
 }
