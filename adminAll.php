@@ -1,8 +1,18 @@
 <?php
+
+session_start();
+
 include_once 'databaseConnect.php';
 
-$sql = "SELECT * FROM comments";
-$result = $con->query($sql);
+if(!isset($_SESSION['sessionToken'], $_GET['sessionToken']) || $_SESSION['sessionToken'] != $_GET['sessionToken']){
+    header('Location: index.php');
+    exit('Invalid Session');
+}
+
+$sql = "SELECT commentID, id, comment, contact, postedOn, nameOfFile FROM comments";
+$stmt = $con->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     echo "<table id='commentsTable'>";
@@ -17,15 +27,15 @@ if ($result->num_rows > 0) {
 
     while ($row = $result->fetch_assoc()) {
         echo "<tr>";
-        echo "<td>" . $row["commentID"] . "</td>";
-        echo "<td>" . $row["id"] . "</td>";
-        echo "<td>" . $row["comment"] . "</td>";
-        echo "<td>" . $row["contact"] . "</td>";
-        echo "<td>" . $row["postedOn"] . "</td>";
+        echo "<td>" . htmlspecialchars($row["commentID"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["id"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["comment"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["contact"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["postedOn"]) . "</td>";
         echo "<td>";
         $imagePath = $row["nameOfFile"];
         if (file_exists($imagePath)) {
-            echo "<img src='" . $imagePath . "' width='100' height='100' />";
+            echo "<img src='" . htmlspecialchars($imagePath) . "' width='100' height='100' />";
         } else {
             echo "No image available";
         }
@@ -37,5 +47,8 @@ if ($result->num_rows > 0) {
 } else {
     echo "<p>No comments found</p>";
 }
+
+$stmt->close();
 $con->close();
+
 ?>

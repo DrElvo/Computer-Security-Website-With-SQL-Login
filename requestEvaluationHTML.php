@@ -4,9 +4,16 @@
 
     if(!isset($_SESSION['loggedin'], $_SESSION['id'])){
         header('Location: index.php');
-        exit();
+        exit('invalid session');
+    }
+    
+    if($_SESSION['loggedin'] != true){
+        header('Location: index.php');
+        exit('invalid session');
     }
 ?>
+
+
 
 <!DOCTYPE html>
 <html>

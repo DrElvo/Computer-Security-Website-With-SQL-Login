@@ -1,10 +1,16 @@
 <?php
 
-#INITIALISE SESSION
-
 session_start();
 
+if(!isset($_SESSION['loggedin'], $_SESSION['id'])){
+    header('Location: index.php');
+    exit('invalid session');
+}
 
+if($_SESSION['loggedin'] != true){
+    header('Location: index.php');
+    exit('invalid session');
+}
 
 if($_SESSION['id'] == 1){
     header('location: adminHome.php');
@@ -33,7 +39,6 @@ if($_SESSION['id'] == 1){
     <script>
         
         function confirmed() {
-        //CHECKS WHETHER OR NOT THERE IS A TAG IN THE URL WHICH INDICATES THAT THE USER HAS JUST SIGNED UP, AND BEEN REDIRECTED BACK TO THE LOGIN PAGE
 
         const urlParams = new URLSearchParams(window.location.search);
         const posted = urlParams.get('posted');

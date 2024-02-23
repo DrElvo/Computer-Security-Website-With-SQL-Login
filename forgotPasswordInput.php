@@ -18,28 +18,39 @@ include_once 'databaseConnect.php';
 
 $secretKey = 'ASuperSecretKey';
 
+
+
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
-    if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
+
+    if(!isset($_SESSION['sessionToken'], $_POST['sessionToken']) || $_SESSION['sessionToken'] != $_POST['sessionToken']){
+        header('Location: index.php');
         exit('Invalid Session');
     }
-    if (!isset($_POST['password'], $_POST["confirm_password"], $_POST["answer"])) {
+
+    if (!isset($_POST['newPassword'], $_POST["confirmpassword"], $_POST["answer"])) {
+        header('Location: forgotPasswordInputHTML.php');
         exit('Please fill all fields available');
     }
+    
     $id = $_SESSION['id'];
-    $password = $_POST["password"];
-    $confirm_password = $_POST['confirm_password'];
-    $answer = $_POST['answer'];
+    $password = $_POST["newPassword"];
+    $confirm_password = $_POST['confirmpassword'];
+    $answer = htmlspecialchars(trim($_POST['answer']));
     $encryptedAnswer = $_SESSION['encryptedAnswer']; 
     $iv = $_SESSION['iv'];
 
-    if ($confirm_password === $password){
+    if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/^.{8,}$/', $password) || !preg_match('/\d/', $password) || !preg_match('/[!@#$%^&*()_+[\]{};\\:|"\\\'<>,.?\/\\-]/', $password)) {
+        header('location: forgotPasswordInputHTML.php?passfail=1');
+        exit('password does not fit security requirements');
+    }
 
+    if ($confirm_password === $password){
         $decryptedAnswer = openssl_decrypt($encryptedAnswer, 'aes-256-cbc', $secretKey, 0, $iv);
-        if ($decryptedAnswer !== $answer){
+        if (!password_verify($answer, $encryptedAnswer)){
             header('Location: index.php');
             exit('wrong security question answer');
         }
-
+        session_regenerate_id();
         $stmt = $con->prepare('UPDATE accounts SET password = ?, passwordToken = NULL WHERE id = ?');
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $stmt->bind_param('ss', $hashed_password, $id);
@@ -47,13 +58,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $stmt->close();
             header('Location: index.php?reset=1');
             exit('your password has been reset');
-    
         } else {
             exit('Error updating verification status: ' . $update_stmt->error);
         }
 
     }else{
-        header('location: forgotPasswordInputHTML.php?passfail=1');
+        header('location: forgotPasswordInputHTML.php?passfailmatch=1');
         exit('passwords did not match');
     }
 
@@ -78,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     $_SESSION['question'] = $question;
     $_SESSION['iv'] = $iv;
 
-    header('Location: forgotPasswordInputHTML.php');
+    header('Location: forgotPasswordInputHTML.php?');
     exit('ready for password reset');
     }
 } else {

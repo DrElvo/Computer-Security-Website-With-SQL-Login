@@ -1,6 +1,10 @@
 <?php
     session_start();
     $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+    if(!isset($_SESSION['attemptLogin']) || $_SESSION['attemptLogin'] !== true){
+        header('Location: index.php');
+        exit('Invalid Session');
+    }
 ?>
 
 <!DOCTYPE html>

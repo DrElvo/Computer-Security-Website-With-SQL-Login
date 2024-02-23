@@ -66,7 +66,7 @@
     }
 
     function firstCheck(){
-        document.getElementById('submit_signup').disabled = false;
+        document.getElementById('submit_signup').disabled = true;
         confirmed()
         check_signup()
         phone_valid()
@@ -111,6 +111,7 @@
     }
 
     function check_password() {
+        
         const password = document.getElementById('password_signup').value;
         const confirmPassword = document.getElementById('confirm_password').value;
 
@@ -131,34 +132,34 @@
     }
 
     function phone_valid() {
-    const phoneNumber = document.getElementById('phoneNumber');
-    phoneNumber.value = phoneNumber.value.replace(/[^0-9+]/g, '');
-    const plusCount = (phoneNumber.value.match(/\+/g) || []).length;
+        const phoneNumber = document.getElementById('phoneNumber');
+        phoneNumber.value = phoneNumber.value.replace(/[^0-9+]/g, '');
+        const plusCount = (phoneNumber.value.match(/\+/g) || []).length;
 
-    let isValid = false;    
+        let isValid = false;    
 
-    if (plusCount > 1 || (plusCount === 1 && phoneNumber.value.indexOf('+') !== 0)) {
-        document.getElementById('numberValidity').style.color = 'red';
-        document.getElementById('numberValidity').innerHTML = 'you can only have one + in your phone number';
-        isValid = false;
-    } else {
-        document.getElementById('numberValidity').style.color = 'green';
-        document.getElementById('numberValidity').innerHTML = 'valid';
-        isValid = true;
-    }
-
-    if (phoneNumber.value.startsWith('+')) {
-        if (phoneNumber.value.length > 13) {
-            phoneNumber.value = phoneNumber.value.slice(0, 13);
+        if (plusCount > 1 || (plusCount === 1 && phoneNumber.value.indexOf('+') !== 0)) {
+            document.getElementById('numberValidity').style.color = 'red';
+            document.getElementById('numberValidity').innerHTML = 'you can only have one + in your phone number';
+            isValid = false;
+        } else {
+            document.getElementById('numberValidity').style.color = 'green';
+            document.getElementById('numberValidity').innerHTML = 'valid';
+            isValid = true;
         }
-    } else {
-        if (phoneNumber.value.length > 12) {
-            phoneNumber.value = phoneNumber.value.slice(0, 12);
-        }
-    }
 
-    return isValid
-}
+        if (phoneNumber.value.startsWith('+')) {
+            if (phoneNumber.value.length > 13) {
+                phoneNumber.value = phoneNumber.value.slice(0, 13);
+            }
+        } else {
+            if (phoneNumber.value.length > 12) {
+                phoneNumber.value = phoneNumber.value.slice(0, 12);
+            }
+        }
+
+        return isValid
+    }
 
     function password_strength() {
 

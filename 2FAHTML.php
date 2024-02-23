@@ -1,6 +1,10 @@
 <?php
     session_start();
     $_SESSION['sessionToken'] = bin2hex(random_bytes(32));
+    if(!isset($_SESSION['attemptLogin']) || $_SESSION['attemptLogin'] !== true){
+        header('Location: index.php');
+        exit('Invalid Session');
+    }
 ?>
 
 <!DOCTYPE html>
@@ -25,6 +29,7 @@
     </form>
 
     <script>
+
         var authenticatorCode = document.getElementById('authenticator_code');
 
         authenticatorCode.addEventListener('input', function(event) {
@@ -39,7 +44,6 @@
 
         var check = function() {
             var code = authenticatorCode.value;
-
             if (code.length < 6) {
                 document.getElementById('message').style.color = 'red';
                 document.getElementById('message').innerHTML = 'Too short';
@@ -54,20 +58,16 @@
         }
 
         function incorrect() {
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const incorrect = urlParams.get('incorrect');
-
-        if (incorrect === '1') {
-            alert('Your authorisation code was incorrect');
-            urlParams.delete('incorrect');
-            const newURL = window.location.pathname + '?' + urlParams.toString();
-            history.replaceState(null, '', newURL);
-        }
-
+            const urlParams = new URLSearchParams(window.location.search);
+            const incorrect = urlParams.get('incorrect');
+            if (incorrect === '1') {
+                alert('Your authorisation code was incorrect');
+                urlParams.delete('incorrect');
+                const newURL = window.location.pathname + '?' + urlParams.toString();
+                history.replaceState(null, '', newURL);
+            }
         }
 
     </script>
 </body>
-
 </html>

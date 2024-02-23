@@ -22,7 +22,8 @@ include_once 'databaseConnect.php';
 
 #CHECK LOGIN CREDENTIALS
 
-if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
+if(!isset($_SESSION['sessionToken'], $_POST['sessionToken']) || $_SESSION['sessionToken'] != $_POST['sessionToken']){
+    header('Location: index.php');
     exit('Invalid Session');
 }
 
@@ -31,7 +32,7 @@ if ( !isset($_POST['username_login'], $_POST['password_login']) ) {
 	exit();
 }
 
-$username = $_POST['username_login'];
+$username = htmlspecialchars(trim($_POST['username_login']));
 
 if($username == 'admin'){
     $stmt = $con->prepare('SELECT id, password FROM accounts WHERE username = ?');
@@ -40,7 +41,7 @@ if($username == 'admin'){
     $stmt->store_result();  
     $stmt->bind_result($id, $password);
     $stmt->fetch();
-    if (password_verify($_POST['password_login'], $password)) {
+    if (password_verify(trim($_POST['password_login']), $password)) {
         session_regenerate_id();
         $_SESSION['id'] = $id;
         $_SESSION['loggedin'] = TRUE;
@@ -50,8 +51,6 @@ if($username == 'admin'){
     header('Location: loginHTML.php?incorrect=1');
     exit();
 }
-
-#PREPARE SQL STATEMENT
 
 if ($stmt = $con->prepare('SELECT id, password, encryptedEmail, verified, iv, verifiedExpiry, lockout, passwordLockoutCount FROM accounts WHERE username = ?')) {
     $stmt->bind_param('s', $username);
@@ -68,13 +67,13 @@ if ($stmt = $con->prepare('SELECT id, password, encryptedEmail, verified, iv, ve
             exit();
         }
         
-        if (password_verify($_POST['password_login'], $password)) {
+        if (password_verify(trim($_POST['password_login']), $password)) {
             session_regenerate_id();
-            
             $secretKey = 'ASuperSecretKey';
             $email = openssl_decrypt($encryptedEmail, 'aes-256-cbc', $secretKey, 0, $iv);
             
             $_SESSION['id'] = $id;
+
             if($verified == 0){
                 if ($verifiedExpiry <= $time){
                     
@@ -94,8 +93,8 @@ if ($stmt = $con->prepare('SELECT id, password, encryptedEmail, verified, iv, ve
 
                     header('Location: index.php?expired=1');
                     exit();
-                    
                 }
+                $_SESSION['attemptLogin'] = true;
                 header('Location: confirmHTML.php');
                 exit();
 
@@ -111,6 +110,8 @@ if ($stmt = $con->prepare('SELECT id, password, encryptedEmail, verified, iv, ve
                 $body = '<p>Your authentication code is:    <b style="font-size: 30px;">' . $authenticator_code_auth. '</b></p>';
 
                 sendEmail($email, $username, $subject, $body);
+
+                $_SESSION['attemptLogin'] = true;
 
                 header('Location: 2FAHTML.php');
                 exit();
@@ -145,5 +146,8 @@ if ($stmt = $con->prepare('SELECT id, password, encryptedEmail, verified, iv, ve
     }
     
     $stmt->close();
+}else{
+    header('Location: index.php');
+    exit();
 }
 ?>

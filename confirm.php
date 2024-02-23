@@ -7,22 +7,14 @@ include_once 'databaseConnect.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" ){
 
-    if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
+    if(!isset($_SESSION['sessionToken'], $_POST['sessionToken']) || $_SESSION['sessionToken'] != $_POST['sessionToken']){
+        header('Location: index.php');
         exit('Invalid Session');
     }
-    
-    if (isset($_POST['id'])) {
 
-        $confirm_code = $_POST['confirm_code'];
-        $id = $_POST['id'];
-
-        $_SESSION['loggedin'] = TRUE;
-        $_SESSION['id'] = $id;
-    } 
-
-    if (isset($_SESSION['loggedin'], $_SESSION['id'])) {
+    if (isset($_SESSION['attemptLogin'], $_SESSION['id'])) {
         $id = $_SESSION['id'];
-        if (isset($_POST['confirm_code'])) {   
+        if (isset($_POST['confirm_code']) || $_POST['confirm_code'] !== '') {   
             $confirmationCode = $_POST['confirm_code'];
         }else {
             exit("No confirmation code!");
@@ -30,12 +22,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" ){
     } else {
         exit("Session data not found");
     }
+
 } else if (isset($_GET['verificationCode']) && isset($_GET['id'])) {
     $id = $_GET['id'];
     $confirmationCode = $_GET['verificationCode']; 
 } else {
-    header('index.php');
-    exit();
+    header('Location: index.php');
+    exit('not a post, not a code');
 }
 
 $stmt = $con->prepare('SELECT encryptedEmail, username, verifyCode, verified, verifiedExpiry, iv FROM accounts WHERE id = ?');
@@ -54,7 +47,7 @@ $email = openssl_decrypt($encryptedEmail, 'aes-256-cbc', $secretKey, 0, $iv);
             
 if($verified == 1){
     header('Location: index.php?verified=1');
-    exit();
+    exit('account already verified');
 }
 
 $time = date('Y-m-d H:i:s'); 
@@ -74,18 +67,18 @@ if ($verifiedExpiry <= $time){
     $stmt->execute();
 
     header('Location: index.php?expired=1');
-    exit();
+    exit('expired link');
 }
 
 if ($confirmationCode == $verifyCode) {
-    $update_stmt = $con->prepare('UPDATE accounts SET verified = ? WHERE id = ?');
+    $update_stmt = $con->prepare('UPDATE accounts SET verified = ?, verifyCode = NULL WHERE id = ?');
     $verified = 1;
     $update_stmt->bind_param('is', $verified, $id);
 
     if ($update_stmt->execute()) {
         $update_stmt->close();
         header('Location: index.php?confirmed=1');
-        exit();
+        exit('confirmed account');
 
     } else {
         exit('Error updating verification status: ' . $update_stmt->error);
@@ -93,7 +86,7 @@ if ($confirmationCode == $verifyCode) {
 
 } else {
     header('Location: confirmHTML.php?incorrect=1');
-    exit();
+    exit('incorrect code');
 }
 
 

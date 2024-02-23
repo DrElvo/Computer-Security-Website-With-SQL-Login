@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
-INSERT INTO accounts (`id`, `username`, `password`, `encryptedEmail`, `encryptedNumber`) VALUES (1, 'admin', '$2y$10$JEHiJW9RMmqFlWJb4kg0Wu/CpBaCas2Vj1Ob/apa/E6g5Cv14oXs2', 'admin@admin.com', '+44 4444 444444');
+INSERT INTO accounts (`id`, `username`, `password`, `encryptedEmail`, `encryptedNumber`, `encryptedQuestion`, `encryptedAnswer`) VALUES (1, 'admin', '$2y$10$JEHiJW9RMmqFlWJb4kg0Wu/CpBaCas2Vj1Ob/apa/E6g5Cv14oXs2', 'admin@admin.com', '+44 4444 444444', 'a', 'b');
 
 CREATE TABLE IF NOT EXISTS comments (
     `commentID` int(11) NOT NULL AUTO_INCREMENT,

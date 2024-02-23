@@ -17,7 +17,8 @@ include_once 'databaseConnect.php';
 
 #CHECK SIGNUP CREDENTIALS
 
-if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
+if(!isset($_SESSION['sessionToken'], $_POST['sessionToken']) || $_SESSION['sessionToken'] != $_POST['sessionToken']){
+    header('Location: index.php');
     exit('Invalid Session');
 }
 
@@ -26,9 +27,6 @@ if (!isset($_POST['email'])) {
 }
 
 $email = $_POST['email'];
-
-#PREPARE SQL STATEMENT
-
 $secretKey = 'ASuperSecretKey';
 
 $check_stmt = $con->prepare('SELECT id, encryptedEmail, iv FROM accounts');

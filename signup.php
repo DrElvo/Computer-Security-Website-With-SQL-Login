@@ -17,7 +17,8 @@ include_once 'databaseConnect.php';
 
 #CHECK LOGIN CREDENTIALS
 
-if ($_SESSION['sessionToken'] != $_POST['sessionToken']){
+if(!isset($_SESSION['sessionToken'], $_POST['sessionToken']) || $_SESSION['sessionToken'] != $_POST['sessionToken']){
+    header('Location: index.php');
     exit('Invalid Session');
 }
 
@@ -26,15 +27,15 @@ if (!isset($_POST['username_signup'], $_POST['email'], $_POST['phoneNumber'], $_
     exit();
 }
 
-$username = $_POST['username_signup'];
+$username = htmlspecialchars(trim($_POST['username_signup']));
 $email = $_POST['email'];
 $password = $_POST["password_signup"];
 $password_confirm = $_POST["confirm_password"];
-$phoneNumber = $_POST['phoneNumber'];
-$securityQuestion = $_POST['securityQuestion'];
-$answer = $_POST['answer'];
+$phoneNumber = htmlspecialchars(trim($_POST['phoneNumber']));
+$securityQuestion = htmlspecialchars(trim($_POST['securityQuestion']));
+$answer = htmlspecialchars(trim($_POST['answer']));
 
-if ($password_confirm != $password){
+if ($password_confirm !== $password){
     header('location: signupHTML.php?passfail=1');
     exit();
 }
@@ -48,7 +49,6 @@ $check_stmt = $con->prepare('SELECT username FROM accounts WHERE username = ?');
 if (!$check_stmt) {
     exit('Error in SQL statement' . $con->error);
 }
-
 
 if ($check_stmt) {
     $check_stmt->bind_param('s', $username);
@@ -96,12 +96,12 @@ if ($check_stmt) {
             
             $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
             $hashed_password = password_hash($_POST['password_signup'], PASSWORD_DEFAULT);
+            $encryptedAnswer = password_hash($answer, PASSWORD_DEFAULT);
 
             $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
             $encryptedEmail = openssl_encrypt($email, 'aes-256-cbc', $secretKey, 0, $iv);
             $encryptedNumber = openssl_encrypt($phoneNumber, 'aes-256-cbc', $secretKey, 0, $iv);
             $encryptedQuestion = openssl_encrypt($securityQuestion, 'aes-256-cbc', $secretKey, 0, $iv);
-            $encryptedAnswer = openssl_encrypt($answer, 'aes-256-cbc', $secretKey, 0, $iv);
 
             $stmt->bind_param('ssssssss', $username, $hashed_password, $encryptedEmail, $encryptedNumber, $verification_code, $encryptedQuestion, $encryptedAnswer, $iv);
 
